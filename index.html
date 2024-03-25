@@ -1,0 +1,122 @@
+
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <title>Leitor de Texto Dinâmico</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #textDisplay {
+            width: 80%;
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px; /* Espaçamento antes dos botões */
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        #textInput {
+            width: 80%;
+            height: 150px;
+            resize: none;
+            margin-top: 10px; /* Espaçamento após os botões */
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            width: 80%;
+            margin-bottom: 10px; /* Espaçamento antes da textarea de entrada */
+        }
+
+        .controls button {
+            padding: 10px 15px;
+            margin: 5px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .highlight {
+            background-color: yellow;
+            font-size: 120%;
+        }
+
+        #periodCounter {
+            text-align: center;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="textDisplay"></div>
+
+<div class="controls">
+    <button id="prevPeriod">Período Anterior</button>
+    <button id="nextPeriod">Próximo Período</button>
+</div>
+
+<textarea id="textInput" placeholder="Insira seu texto aqui..."></textarea>
+<div id="periodCounter"></div>
+
+<script>
+let currentPeriodIndex = 0;
+let periods = [];
+
+document.getElementById('textInput').addEventListener('input', function() {
+    const textContent = this.value.replace(/Dr\./g, 'DrTEMP');
+    periods = textContent.match(/[^.!?]+[.!?]["']?\s*/g) || [];
+    periods = periods.map(period => period.replace(/DrTEMP/g, 'Dr.'));
+    adjustTextDisplayHeight();
+    currentPeriodIndex = 0;
+    displayPeriod();
+});
+
+function adjustTextDisplayHeight() {
+    let maxPeriodLength = periods.reduce((max, period) => Math.max(max, period.length), 0);
+    let linesNeeded = Math.ceil(maxPeriodLength / 100); // Estimativa de linhas necessárias, considerando 100 caracteres por linha.
+    let height = Math.min(Math.max(linesNeeded + 10, 10), 30); // Garante um mínimo de 10 linhas e um máximo de 30.
+    document.getElementById('textDisplay').style.height = `${height * 1.5}em`; // Ajusta a altura com base no número de linhas, considerando 1.5em por linha.
+}
+
+function displayPeriod() {
+    const textDisplay = document.getElementById('textDisplay');
+    textDisplay.innerHTML = '';
+
+    if(periods.length > 0) {
+        textDisplay.textContent = periods[currentPeriodIndex];
+        document.getElementById('periodCounter').textContent = `Período: ${currentPeriodIndex + 1} de ${periods.length}`;
+    } else {
+        document.getElementById('periodCounter').textContent = 'Nenhum período encontrado.';
+    }
+}
+
+document.getElementById('nextPeriod').addEventListener('click', function() {
+    if (currentPeriodIndex < periods.length - 1) {
+        currentPeriodIndex++;
+        displayPeriod();
+    }
+});
+
+document.getElementById('prevPeriod').addEventListener('click', function() {
+    if (currentPeriodIndex > 0) {
+        currentPeriodIndex--;
+        displayPeriod();
+    }
+});
+</script>
+
+</body>
+</html>
